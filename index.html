@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Gallery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #1c1c1c;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background-color: transparent;
+            border: 2px solid #666666;
+            border-radius: 25px;
+            color: white;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .folder-info {
+            color: #666666;
+            font-size: 0.9rem;
+            margin-right: auto;
+            margin-left: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .upload-btn, .clear-btn {
+            background-color: #666666;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .upload-btn:hover {
+            background-color: #bdd6ff;
+            color: #1c1c1c;
+        }
+
+        .clear-btn {
+            background-color: #ff6b6b;
+        }
+
+        .clear-btn:hover {
+            background-color: #ff4f4f;
+        }
+
+        .view-options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-btn {
+            background-color: #666666;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .view-btn.active {
+            background-color: #bdd6ff;
+            color: #1c1c1c;
+        }
+
+        .photo-container {
+            padding: 20px;
+        }
+
+        /* Grid View */
+        .photo-container.grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        /* List View */
+        .photo-container.list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .photo-item {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+            background-color: #2a2a2a;
+        }
+
+        .photo-container.grid .photo-item {
+            aspect-ratio: 1;
+        }
+
+        .photo-container.list .photo-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            gap: 20px;
+        }
+
+        .photo-container.list .photo-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .photo-container.grid .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-item:hover {
+            transform: scale(1.02);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 40px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90vh;
+            position: relative;
+        }
+
+        .modal-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 15px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background-color: #666666;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .close-btn:hover {
+            background-color: #bdd6ff;
+            color: #1c1c1c;
+        }
+
+        .photo-info {
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .photo-container.grid .photo-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .photo-container.grid .photo-item:hover .photo-info {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <label class="upload-btn">
+            Select Folder
+            <input type="file" webkitdirectory directory multiple style="display: none" id="folderUpload">
+        </label>
+        <div class="folder-info" id="folderInfo">No folder selected</div>
+        <div class="button-group">
+            <button class="clear-btn" id="clearBtn">Clear All</button>
+            <div class="view-options">
+                <button class="view-btn active" data-view="grid">Grid</button>
+                <button class="view-btn" data-view="list">List</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="photo-container grid" id="photoContainer"></div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="close-btn">&times;</button>
+            <img src="" alt="" id="modalImage">
+        </div>
+    </div>
+
+    <script>
+        const folderUpload = document.getElementById('folderUpload');
+        const photoContainer = document.getElementById('photoContainer');
+        const modal = document.getElementById('modal');
+        const modalImage = document.getElementById('modalImage');
+        const closeBtn = document.querySelector('.close-btn');
+        const viewButtons = document.querySelectorAll('.view-btn');
+        const clearBtn = document.getElementById('clearBtn');
+        const folderInfo = document.getElementById('folderInfo');
+
+        let photos = JSON.parse(localStorage.getItem('photos')) || [];
+        let currentFolder = JSON.parse(localStorage.getItem('currentFolder')) || {
+            path: null,
+            lastModified: null
+        };
+
+        function formatSize(bytes) {
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            let i = 0;
+            while (bytes >= 1024 && i < sizes.length - 1) {
+                bytes /= 1024;
+                i++;
+            }
+            return `${bytes.toFixed(1)} ${sizes[i]}`;
+        }
+
+        function updateFolderInfo() {
+            if (currentFolder.path) {
+                const date = new Date(currentFolder.lastModified).toLocaleDateString();
+                folderInfo.textContent = `${currentFolder.path} (Last updated: ${date})`;
+            } else {
+                folderInfo.textContent = 'No folder selected';
+            }
+        }
+
+        function clearGallery() {
+            photos = [];
+            currentFolder = {
+                path: null,
+                lastModified: null
+            };
+            localStorage.removeItem('photos');
+            localStorage.removeItem('currentFolder');
+            renderPhotos();
+            updateFolderInfo();
+        }
+
+        function addPhotos(files) {
+            if (files.length === 0) return;
+
+            const folderPath = files[0].webkitRelativePath.split('/')[0];
+            const lastModified = new Date().getTime();
+
+            currentFolder = {
+                path: folderPath,
+                lastModified
+            };
+
+            const imageFiles = Array.from(files).filter(file => 
+                file.type.startsWith('image/')
+            );
+
+            photos = imageFiles.map(file => ({
+                id: Date.now() + Math.random(),
+                name: file.name,
+                path: file.webkitRelativePath || file.name,
+                url: URL.createObjectURL(file),
+                size: file.size,
+                date: file.lastModified
+            }));
+
+            localStorage.setItem('currentFolder', JSON.stringify(currentFolder));
+            savePhotos();
+            renderPhotos();
+            updateFolderInfo();
+        }
+
+        function savePhotos() {
+            localStorage.setItem('photos', JSON.stringify(photos.map(p => ({
+                id: p.id,
+                name: p.name,
+                path: p.path,
+                size: p.size,
+                date: p.date
+            }))));
+        }
+
+        function renderPhotos() {
+            photoContainer.innerHTML = photos.map(photo => `
+                <div class="photo-item" data-id="${photo.id}">
+                    <img src="${photo.url}" alt="${photo.name}">
+                    <div class="photo-info">
+                        <div>${photo.name}</div>
+                        <div>${formatSize(photo.size)}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.photo-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const photo = photos.find(p => p.id === parseFloat(item.dataset.id));
+                    if (photo) {
+                        modalImage.src = photo.url;
+                        modal.classList.add('active');
+                    }
+                });
+            });
+        }
+
+        // Event listeners
+        folderUpload.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                if (currentFolder.path) {
+                    clearGallery();
+                }
+                addPhotos(e.target.files);
+            }
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+
+        clearBtn.addEventListener('click', clearGallery);
+
+        viewButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                viewButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                photoContainer.className = `photo-container ${button.dataset.view}`;
+            });
+        });
+
+        // Initialize
+        updateFolderInfo();
+        renderPhotos();
+    </script>
+</body>
+</html>
