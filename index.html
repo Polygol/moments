@@ -817,14 +817,15 @@
 
         // Setup communication with camera app
         function setupCommunication() {
-            window.addEventListener('message', async (event) => {
-                if (event.origin === window.location.origin) {
-                    if (event.data.type === 'photoAdded') {
-                        await loadPhotos();
-                        renderPhotos();
-                    }
-                }
-            });
+          window.addEventListener('message', async (event) => {
+            if (event.origin !== window.location.origin) return;
+        
+            // only handle the forwarded payload
+            if (event.data.type === 'photoAdded') {
+              await loadPhotos();
+              renderPhotos();
+            }
+          });
         }
 
         // IndexedDB setup
@@ -1246,11 +1247,16 @@
                 renderPhotos();
                 updateSelectionUI();
         
-                // Notify camera app
-                window.postMessage({ type: 'photoDeleted', photoId: photoId }, window.location.origin);
-            } catch (error) {
+                // tell the parent to forward to Camera
+                window.parent.postMessage({
+                  targetApp:   'Camera',
+                  type:        'photoDeleted',
+                  photoId
+                }, window.location.origin);
+            
+              } catch (error) {
                 console.error('Error deleting photo:', error);
-            }
+              }
         }
 
        // Format date for display
