@@ -907,18 +907,18 @@
             document.getElementById('delete-btn').addEventListener('click', deleteCurrentPhoto);
             document.getElementById('edit-btn').addEventListener('click', editCurrentPhoto);
         }
-
+        
         // Open camera app
         function openCamera() {
             // Try to open in same tab or new tab
             try {
-                window.location.href = 'camera.html';
+                window.location.href = '/camera/index.html';
             } catch (error) {
-                window.open('camera.html', '_blank');
+                window.open('/camera/index.html', '_blank');
             }
         }
 
-// Render photos based on current view (continued)
+        // Render photos based on current view
        function renderPhotos() {
            if (filteredPhotos.length === 0) {
                showEmptyState();
