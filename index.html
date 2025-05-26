@@ -780,12 +780,21 @@
         const selectionCount = document.getElementById('selection-count');
 
         // Initialize app
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeTheme();
-            loadPhotos();
-            setupEventListeners();
-            setupCommunication();
-            renderPhotos();
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await photoDB.init();
+                await loadPhotos();
+                initializeTheme();
+                setupEventListeners();
+                setupCommunication();
+                renderPhotos();
+            } catch (error) {
+                console.error('Error initializing app:', error);
+                initializeTheme();
+                setupEventListeners();
+                setupCommunication();
+                renderPhotos();
+            }
         });
 
         // Theme synchronization
@@ -808,40 +817,91 @@
 
         // Setup communication with camera app
         function setupCommunication() {
-            // Listen for messages from camera app
-            window.addEventListener('message', (event) => {
+            window.addEventListener('message', async (event) => {
                 if (event.origin === window.location.origin) {
                     if (event.data.type === 'photoAdded') {
-                        loadPhotos();
+                        await loadPhotos();
                         renderPhotos();
                     }
                 }
             });
-
-            // Listen for storage changes (photos from camera app)
-            window.addEventListener('storage', (event) => {
-                if (event.key === 'camera-photos') {
-                    loadPhotos();
-                    renderPhotos();
-                }
-            });
         }
 
-        // Load photos from localStorage (shared with camera app)
-        function loadPhotos() {
-            const cameraPhotos = JSON.parse(localStorage.getItem('camera-photos')) || [];
-            
-            photos = cameraPhotos.map(photo => ({
-                id: photo.id,
-                url: photo.url,
-                timestamp: photo.timestamp,
-                name: `IMG_${new Date(photo.timestamp).toISOString().slice(0, 19).replace(/[:-]/g, '')}.jpg`,
-                size: 'Unknown', // Can't determine size from blob URL
-                date: new Date(photo.timestamp),
-                type: 'image/jpeg'
-            }));
+        // IndexedDB setup
+        class PhotoDB {
+            constructor() {
+                this.dbName = 'PhotosDB';
+                this.version = 1;
+                this.db = null;
+            }
+        
+            async init() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(this.dbName, this.version);
+                    
+                    request.onerror = () => reject(request.error);
+                    request.onsuccess = () => {
+                        this.db = request.result;
+                        resolve();
+                    };
+                    
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        if (!db.objectStoreNames.contains('photos')) {
+                            const store = db.createObjectStore('photos', { keyPath: 'id' });
+                            store.createIndex('timestamp', 'timestamp', { unique: false });
+                        }
+                    };
+                });
+            }
+        
+            async savePhoto(photo) {
+                const transaction = this.db.transaction(['photos'], 'readwrite');
+                const store = transaction.objectStore('photos');
+                return store.put(photo);
+            }
+        
+            async getAllPhotos() {
+                const transaction = this.db.transaction(['photos'], 'readonly');
+                const store = transaction.objectStore('photos');
+                const index = store.index('timestamp');
+                return new Promise((resolve, reject) => {
+                    const request = index.getAll();
+                    request.onsuccess = () => resolve(request.result.reverse()); // Most recent first
+                    request.onerror = () => reject(request.error);
+                });
+            }
+        
+            async deletePhoto(id) {
+                const transaction = this.db.transaction(['photos'], 'readwrite');
+                const store = transaction.objectStore('photos');
+                return store.delete(id);
+            }
+        }
+        
+        const photoDB = new PhotoDB();
 
-            filteredPhotos = [...photos];
+        // Load photos (shared with camera app)
+        async function loadPhotos() {
+            try {
+                const dbPhotos = await photoDB.getAllPhotos();
+                
+                photos = dbPhotos.map(photo => ({
+                    id: photo.id,
+                    url: photo.url,
+                    timestamp: photo.timestamp,
+                    name: `IMG_${new Date(photo.timestamp).toISOString().slice(0, 19).replace(/[:-]/g, '')}.jpg`,
+                    size: 'Unknown',
+                    date: new Date(photo.timestamp),
+                    type: 'image/jpeg'
+                }));
+        
+                filteredPhotos = [...photos];
+            } catch (error) {
+                console.error('Error loading photos:', error);
+                photos = [];
+                filteredPhotos = [];
+            }
         }
 
         // Setup event listeners
@@ -1167,37 +1227,31 @@
        }
 
        // Delete photo
-       function deletePhoto(photoId) {
-           // Remove from local photos array
-           const photoIndex = photos.findIndex(p => p.id === photoId);
-           if (photoIndex > -1) {
-               const photo = photos[photoIndex];
-               URL.revokeObjectURL(photo.url);
-               photos.splice(photoIndex, 1);
-           }
-
-           // Remove from camera app's storage
-           const cameraPhotos = JSON.parse(localStorage.getItem('camera-photos')) || [];
-           const updatedCameraPhotos = cameraPhotos.filter(p => p.id !== photoId);
-           localStorage.setItem('camera-photos', JSON.stringify(updatedCameraPhotos));
-
-           // Update filtered photos
-           filteredPhotos = filteredPhotos.filter(p => p.id !== photoId);
-           
-           // Remove from selection if selected
-           selectedPhotos.delete(photoId);
-           
-           // Re-render
-           renderPhotos();
-           updateSelectionUI();
-
-           // Notify camera app
-           try {
-               window.postMessage({ type: 'photoDeleted', photoId: photoId }, window.location.origin);
-           } catch (error) {
-               console.log('Could not notify camera app:', error);
-           }
-       }
+       async function deletePhoto(photoId) {
+            try {
+                // Remove from IndexedDB
+                await photoDB.deletePhoto(photoId);
+                
+                // Remove from local arrays
+                const photoIndex = photos.findIndex(p => p.id === photoId);
+                if (photoIndex > -1) {
+                    const photo = photos[photoIndex];
+                    URL.revokeObjectURL(photo.url);
+                    photos.splice(photoIndex, 1);
+                }
+        
+                filteredPhotos = filteredPhotos.filter(p => p.id !== photoId);
+                selectedPhotos.delete(photoId);
+                
+                renderPhotos();
+                updateSelectionUI();
+        
+                // Notify camera app
+                window.postMessage({ type: 'photoDeleted', photoId: photoId }, window.location.origin);
+            } catch (error) {
+                console.error('Error deleting photo:', error);
+            }
+        }
 
        // Format date for display
        function formatDate(date) {
@@ -1231,15 +1285,6 @@
        window.handlePhotoClick = handlePhotoClick;
        window.togglePhotoSelection = togglePhotoSelection;
 
-       // Auto-refresh photos every 5 seconds to sync with camera app
-       setInterval(() => {
-           const currentPhotoCount = photos.length;
-           loadPhotos();
-           if (photos.length !== currentPhotoCount) {
-               renderPhotos();
-           }
-       }, 5000);
-
        // Handle keyboard shortcuts
        document.addEventListener('keydown', (event) => {
            if (event.key === 'Escape') {
@@ -1258,35 +1303,6 @@
                renderPhotos();
            }
        });
-
-        // Theme synchronization
-        document.addEventListener('DOMContentLoaded', () => {
-            const storedTheme = localStorage.getItem('theme') || 'dark';
-            document.body.classList.toggle('light-theme', storedTheme === 'light');
-            
-            const animationsEnabled = localStorage.getItem('animationsEnabled') !== 'false';
-            document.body.classList.toggle('reduce-animations', !animationsEnabled);
-            
-            window.addEventListener('message', (event) => {
-                if (event.origin === window.location.origin) {
-                    if (event.data.type === 'themeUpdate') {
-                        const newTheme = event.data.theme;
-                        document.body.classList.toggle('light-theme', newTheme === 'light');
-                    } else if (event.data.type === 'animationsUpdate') {
-                        const enableAnimations = event.data.enabled;
-                        document.body.classList.toggle('reduce-animations', !enableAnimations);
-                    }
-                }
-            });
-            
-            setInterval(() => {
-                const currentTheme = localStorage.getItem('theme') || 'dark';
-                document.body.classList.toggle('light-theme', currentTheme === 'light');
-                
-                const currentAnimState = localStorage.getItem('animationsEnabled') !== 'false';
-                document.body.classList.toggle('reduce-animations', !currentAnimState);
-            }, 5000);
-        });
    </script>
 </body>
 </html>
