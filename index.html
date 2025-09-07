@@ -12,6 +12,7 @@
     <style>
         :root {
             --edge-refraction-filter: url('#edge-refraction-only');
+            --sun-shadow: 0 0 0 0 transparent;
             
             /* Dark Theme (Default) Variables */
             --background-color-dark: #1c1c1c;
@@ -190,6 +191,7 @@
             padding: 8px 15px 8px 44px;
             color: var(--text-color);
             backdrop-filter: blur(5px) saturate(2) var(--edge-refraction-filter);
+            box-shadow: var(--sun-shadow);
             width: 200px;
             transition: width 0.3s ease;
             height: 50px;
@@ -220,6 +222,7 @@
             border-radius: 25px;
             padding: 4px;
             backdrop-filter: blur(5px) saturate(2) var(--edge-refraction-filter);
+            box-shadow: var(--sun-shadow);
             border: 1px solid var(--glass-border);
             height: 50px;
         }
@@ -254,6 +257,7 @@
             align-items: center;
             cursor: pointer;
             backdrop-filter: blur(5px) saturate(2) var(--edge-refraction-filter);
+            box-shadow: var(--sun-shadow);
             font-size: 1.3rem;
         }
         
@@ -323,6 +327,7 @@
             opacity: 0;
             transition: opacity 0.2s;
             backdrop-filter: blur(5px) saturate(2) var(--edge-refraction-filter);
+            box-shadow: var(--sun-shadow);
         }
         
         .photo-item.selected .select-checkbox {
@@ -351,6 +356,7 @@
             gap: 15px;
             border: 1px solid var(--glass-border);
             backdrop-filter: blur(5px) saturate(2) var(--edge-refraction-filter);
+            box-shadow: var(--sun-shadow);
             cursor: pointer;
             transition: transform 0.2s;
         }
@@ -453,7 +459,7 @@
             overflow-y: auto;
             border: 1px solid var(--glass-border);
             backdrop-filter: blur(10px) saturate(2) var(--edge-refraction-filter);
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.2);
+            box-shadow: var(--sun-shadow), 0 0 50px rgba(0, 0, 0, 0.2);
         }
         
         .preview-header {
@@ -529,6 +535,7 @@
             cursor: pointer;
             transition: background-color 0.2s;
             backdrop-filter: blur(5px) saturate(2) var(--edge-refraction-filter);
+            box-shadow: var(--sun-shadow);
             display: flex;
             align-items: center;
             gap: 8px;
@@ -556,7 +563,7 @@
             padding: 10px 15px 10px 25px;
             border-radius: 32px;
             border: 1px solid var(--glass-border);
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            box-shadow: var(--sun-shadow), 0 0 15px rgba(0, 0, 0, 0.05);
             display: none;
             gap: 10px;
             align-items: center;
