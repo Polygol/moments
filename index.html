@@ -785,7 +785,6 @@
         <div class="preview-content">
             <div class="preview-header">
                 <div class="preview-title" id="preview-title">Photo Details</div>
-                <button class="close-preview" id="close-preview-btn">×</button>
             </div>
             <img class="preview-image" id="preview-image" src="" alt="Photo preview">
             <div class="preview-info" id="preview-info">
@@ -833,7 +832,6 @@
         const previewImage = document.getElementById('preview-image');
         const previewTitle = document.getElementById('preview-title');
         const previewInfo = document.getElementById('preview-info');
-        const closePreviewBtn = document.getElementById('close-preview-btn');
         const selectionActions = document.getElementById('selection-actions');
         const selectionCount = document.getElementById('selection-count');
 
@@ -967,14 +965,6 @@
                     filteredPhotos = [...photos];
                 }
                 renderPhotos();
-            });
-
-            // Modal close
-            closePreviewBtn.addEventListener('click', closePhotoPreview);
-            photoPreviewModal.addEventListener('click', (e) => {
-                if (e.target === photoPreviewModal) {
-                    closePhotoPreview();
-                }
             });
 
             // Selection actions
