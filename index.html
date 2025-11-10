@@ -459,15 +459,16 @@
         
         .preview-content {
             background-color: var(--search-background);
-            border-radius: 25px;
-            padding: 20px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
+            border-radius: 50px 50px 0 0;
+            corner-shape: superellipse(1.5);
+            padding: 20px 30px;
+            width: 95%;
             overflow-y: auto;
             border: 1px solid var(--glass-border);
             backdrop-filter: var(--edge-refraction-filter) saturate(2) blur(5px);
             box-shadow: var(--sun-shadow), 0 0 50px rgba(0, 0, 0, 0.2);
+            height: calc(100% - 80px);
+            margin-top: auto;
         }
         
         .preview-header {
@@ -634,7 +635,7 @@
             }
             
             .preview-content {
-                width: 95%;
+                width: 100%;
                 padding: 15px;
             }
             
