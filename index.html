@@ -1174,8 +1174,8 @@
        }
 
        // Delete current photo
-       function deleteCurrentPhoto() {
-           if (currentPreviewPhoto && confirm('Are you sure you want to delete this photo?')) {
+       async function deleteCurrentPhoto() {
+           if (currentPreviewPhoto && await Gurasuraisu.showConfirm('Are you sure you want to delete this photo?')) {
                deletePhoto(currentPreviewPhoto.id);
                closePhotoPreview();
            }
@@ -1211,8 +1211,8 @@
        }
 
        // Delete selected photos
-       function deleteSelected() {
-           if (confirm(`Are you sure you want to delete ${selectedPhotos.size} photos?`)) {
+       async function deleteSelected() {
+           if (await Gurasuraisu.showConfirm(`Are you sure you want to delete ${selectedPhotos.size} photos?`)) {
                Array.from(selectedPhotos).forEach(id => deletePhoto(id));
                clearSelection();
            }
