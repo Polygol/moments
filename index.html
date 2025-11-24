@@ -1185,7 +1185,7 @@
        function editCurrentPhoto() {
            if (currentPreviewPhoto) {
                // Open photo editor or show edit options
-               alert('Photo editing feature coming soon!');
+               Gurasuraisu.showAlert('Error');
            }
        }
 
@@ -1205,7 +1205,7 @@
                    text: `Sharing ${selected.length} photos`
                }).catch(console.error);
            } else {
-               alert('Sharing is not supported on this device');
+               Gurasuraisu.showAlert('Failed to share', 'Sharing is not supported on this device');
            }
            clearSelection();
        }
@@ -1243,14 +1243,14 @@
                    })
                    .catch(error => {
                        console.error('Error sharing photo:', error);
-                       alert('Unable to share photo');
+                       Gurasuraisu.showAlert('Failed to share', 'Unable to share photo');
                    });
            } else {
                // Fallback: copy link or show share options
                navigator.clipboard.writeText(photo.url).then(() => {
-                   alert('Photo link copied to clipboard');
+                   Gurasuraisu.showPopup('Photo link copied to clipboard');
                }).catch(() => {
-                   alert('Sharing is not supported on this device');
+                   Gurasuraisu.showAlert('Failed to share', 'Sharing is not supported on this device');
                });
            }
        }
