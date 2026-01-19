@@ -648,34 +648,11 @@
             }
         }
         
-        /* Animations */
-        .reduce-animations * {
-           animation: none !important;
-           transition: opacity 0.3s ease !important;
-           transition-property: opacity !important;
-        }
-        
-        .reduce-animations button,
-        .reduce-animations .photo-item,
-        .reduce-animations .photo-list-item {
-           transform: scale(1) !important;
-           transition: opacity 0.3s ease !important;
-        }
-        
-        .reduce-animations button:active,
-        .reduce-animations .photo-item:active,
-        .reduce-animations .photo-list-item:active {
-           transform: scale(0.98) !important;
-           transition: none !important;
-           filter: brightness(1.5) !important;
-        }
-        
         /* Active effect */
-        button:active, 
         .photo-item:active,
         .photo-list-item:active {
-           transform: scale(0.96);
-           transition: all 0.1s cubic-bezier(0.2, 0, 0.38, 0.9);
+           transform: scale(1.1);
+           transition: transform 0.3s cubic-bezier(.2, 1.3, .64, 1), filter 0.3s cubic-bezier(.2, 1.3, .64, 1);
            filter: brightness(1.5);
         }
     </style>
