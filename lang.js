@@ -1,5 +1,5 @@
 // Polygol Moments Language Dictionary
-const LANG_EN_MOMENTS = {
+window.LANG_EN_MOMENTS = {
     TITLE: "Moments",
     GRID_VIEW: "Grid",
     LIST_VIEW: "List",
@@ -33,7 +33,7 @@ const LANG_EN_MOMENTS = {
     DATE_DAYS_AGO: "{days} days ago"
 };
 
-const LANG_JP_MOMENTS = {
+window.LANG_JP_MOMENTS = {
     TITLE: "写真",
     GRID_VIEW: "グリッド",
     LIST_VIEW: "リスト",
@@ -67,7 +67,7 @@ const LANG_JP_MOMENTS = {
     DATE_DAYS_AGO: "{days}日前"
 };
 
-const LANG_KO_MOMENTS = {
+window.LANG_KO_MOMENTS = {
     TITLE: "모먼츠",
     GRID_VIEW: "그리드",
     LIST_VIEW: "목록",
@@ -101,7 +101,7 @@ const LANG_KO_MOMENTS = {
     DATE_DAYS_AGO: "{days}일 전"
 };
 
-const LANG_ZH_MOMENTS = {
+window.LANG_ZH_MOMENTS = {
     TITLE: "时刻",
     GRID_VIEW: "网格",
     LIST_VIEW: "列表",
@@ -134,3 +134,8 @@ const LANG_ZH_MOMENTS = {
     DATE_YESTERDAY: "昨天",
     DATE_DAYS_AGO: "{days}天前"
 };
+
+var LANG_EN_MOMENTS = window.LANG_EN_MOMENTS;
+var LANG_JP_MOMENTS = window.LANG_JP_MOMENTS;
+var LANG_KO_MOMENTS = window.LANG_KO_MOMENTS;
+var LANG_ZH_MOMENTS = window.LANG_ZH_MOMENTS;

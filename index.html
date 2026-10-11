@@ -832,7 +832,7 @@
                 if (query) {
                     filteredPhotos = photos.filter(photo => 
                         photo.name.toLowerCase().includes(query) ||
-                        photo.date.toLocaleDateString().includes(query)
+                        photo.date.toLocaleDateString(bcpMap[getAppLanguage()] || 'en-US').includes(query)
                     );
                 } else {
                     filteredPhotos = [...photos];
@@ -1048,7 +1048,7 @@
 
        // Delete current photo
        async function deleteCurrentPhoto() {
-           if (currentPreviewPhoto && await Polygol.showConfirm('Are you sure you want to delete this photo?')) {
+           if (currentPreviewPhoto && await Polygol.showConfirm(t('DELETE_CONFIRM_SINGLE'))) {
                deletePhoto(currentPreviewPhoto.id);
                closePhotoPreview();
            }
@@ -1085,7 +1085,7 @@
 
        // Delete selected photos
        async function deleteSelected() {
-           if (await Polygol.showConfirm(`Are you sure you want to delete ${selectedPhotos.size} photos?`)) {
+           if (await Polygol.showConfirm(t('DELETE_CONFIRM_MULTIPLE', {count: selectedPhotos.size}))) {
                Array.from(selectedPhotos).forEach(id => deletePhoto(id));
                clearSelection();
            }
@@ -1121,7 +1121,7 @@
            } else {
                // Fallback: copy link or show share options
                navigator.clipboard.writeText(photo.url).then(() => {
-                   Polygol.showPopup('Photo link copied to clipboard');
+                   Polygol.showPopup(t('SHARE_LINK_COPIED'));
                }).catch(() => {
                    Polygol.showAlert('Failed to share', 'Sharing is not supported on this device');
                });
@@ -1173,7 +1173,7 @@
            } else if (diffDays <= 7) {
                return `${diffDays - 1} days ago`;
            } else {
-               return date.toLocaleDateString();
+               return date.toLocaleDateString(bcpMap[getAppLanguage()] || 'en-US');
            }
        }
 
